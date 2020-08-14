@@ -3,6 +3,8 @@ let tables = require("../data/tables.js");
 
 let waitlist = require("../data/waitlist.js");
 
+const https = require('https');
+
 
 module.exports = (app) => {
     app.post("/api/tables", (req, res) => {
@@ -19,10 +21,18 @@ module.exports = (app) => {
     });
 
     app.get("/api/tables", (req, res) => {
+        // sets content-type to "application/json"
+        // formats the variable that is in the input parameter as a JSON string
         res.json(tables);
     });
     app.get("/api/waitlist", (req, res) => {
         res.json(waitlist);
+    });
+
+    app.delete("/api/table/delete/:tableIndex", (req, res) => {
+        let tableIndex = parseInt(req.params.tableIndex);
+        tables = tables.filter( (e, i) => i != tableIndex ); 
+        res.json(tables);
     });
 
     
@@ -30,5 +40,13 @@ module.exports = (app) => {
         tables = [];
         waitlist = [];
         res.end();
+    });
+
+    app.get("/test/api/proxy", (req, res) => {
+        let target = req.query.target;
+        console.log(target);
+        https.get(decodeURIComponent(target), function(result){
+            res.end(result);
+        });
     });
 }

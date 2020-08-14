@@ -84,26 +84,55 @@
         console.log(tableData);
         console.log("------------------------------------");
 
-        // Loop through and display each of the customers
-        for (var i = 0; i < tableData.length; i++) {
+        // need a parent for the children I'm creating
+        var tableList = $("#tableList");
 
-          // Get a reference to the tableList element and populate it with tables
-          var tableList = $("#tableList");
-
-          // Then display the fields in the HTML (Section Name, Date, URL)
-          var listItem = $("<li class='list-group-item mt-4'>");
-
+        // use map to replace the for-loop
+        // map is our transformer function
+        // t is the table data for one table
+        // i is the index
+        tableData.map( (t, i) => {
+          let listItem = $("<li class='list-group-item mt-4'>");
           listItem.append(
-            $("<h2>").text("Table #" + (i + 1)),
+            // adding the data
+            $("<h2>").text(`Table #${i + 1}`),
             $("<hr>"),
-            $("<h2>").text("ID: " + tableData[i].customerID),
-            $("<h2>").text("Name: " + tableData[i].customerName),
-            $("<h2>").text("Email: " + tableData[i].customerEmail),
-            $("<h2>").text("Phone: " + tableData[i].phoneNumber)
+            $("<h2>").text("ID: " + t.customerID),
+            $("<h2>").text("Name: " + t.customerName),
+            $("<h2>").text("Email: " + t.customerEmail),
+            $("<h2>").text("Phone: " + t.phoneNumber),
+            $("<button>").text("Customer Left")
+              .attr("data-table-index", i)
+              // need a class to find it later
+              .addClass("delete-button")
           );
+          // need to return the new child jquery element created from data
+          return listItem;
+        }).forEach(table => {
+          // append all the jquery object children to the parent
+          tableList.append(table);
+        });
 
-          tableList.append(listItem);
-        }
+        // // Loop through and display each of the customers
+        // for (var i = 0; i < tableData.length; i++) {
+
+        //   // Get a reference to the tableList element and populate it with tables
+        //   var tableList = $("#tableList");
+
+        //   // Then display the fields in the HTML (Section Name, Date, URL)
+        //   var listItem = $("<li class='list-group-item mt-4'>");
+
+        //   listItem.append(
+        //     $("<h2>").text("Table #" + (i + 1)),
+        //     $("<hr>"),
+        //     $("<h2>").text("ID: " + tableData[i].customerID),
+        //     $("<h2>").text("Name: " + tableData[i].customerName),
+        //     $("<h2>").text("Email: " + tableData[i].customerEmail),
+        //     $("<h2>").text("Phone: " + tableData[i].phoneNumber)
+        //   );
+
+        //   tableList.append(listItem);
+        // }
       });
   }
 
@@ -153,6 +182,18 @@
 
   $("#clear").on("click", clearTable);
 
+  $("body").on("click", ".delete-button", (event) => {
+    // console.log(event.target);
+    let tableIndex = $(event.target).attr("data-table-index");
+    $.ajax({
+      url: "/api/table/delete/" + tableIndex,
+      method: "DELETE"
+    })
+    .then( result => {
+      console.log(result);
+      location.reload();
+    });
+  });
 
   // Run Queries!
   // ==========================================
